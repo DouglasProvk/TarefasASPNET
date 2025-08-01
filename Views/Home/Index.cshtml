@@ -1,0 +1,112 @@
+﻿@{
+	ViewData["Title"] = "Home Page";
+}
+
+@model List<TarefasASPNET.Models.Tarefas>
+
+<div class="container py-5">
+	<h2 class="mb-4">Lista de Tarefas</h2>
+
+	<div class="table-responsive">
+		<table class="table table-bordered align-middle">
+			<thead class="table-light">
+				<tr>
+					<th>ID</th>
+					<th>Nome da Tarefa</th>
+					<th>Custo</th>
+					<th>Data Limite</th>
+					<th>Ações</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (var item in Model)
+				{
+					var highlight = item.Custo >= 1000 ? "table-warning" : "";
+					<tr class="@highlight">
+						<td>@item.Id</td>
+						<td>@item.Nome</td>
+						<td>@item.Custo.ToString("C")</td>
+						<td>@item.DataLimite.ToString("dd/MM/yyyy")</td>
+						<td>
+
+
+							<button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal" data-bs-target="#editModal-@item.Id">
+								<i class="fas fa-edit"></i>
+							</button>
+
+
+							<div class="modal fade" id="editModal-@item.Id" tabindex="-1" aria-labelledby="editModalLabel-@item.Id" aria-hidden="true">
+								<div class="modal-dialog">
+									<div class="modal-content">
+										<div class="modal-header bg-primary text-white">
+											<h5 class="modal-title" id="editModalLabel-@item.Id">Editar Tarefa</h5>
+											<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+										</div>
+										<form asp-action="Edit" asp-controller="Home" method="post">
+											@Html.AntiForgeryToken()
+											<div class="modal-body">
+												<input type="hidden" name="id" value="@item.Id" />
+												<div class="mb-3">
+													<label for="nome-@item.Id" class="form-label">Nome da Tarefa</label>
+													<input type="text" class="form-control" id="nome-@item.Id" name="nome" value="@item.Nome" required />
+												</div>
+												<div class="mb-3">
+													<label for="custo-@item.Id" class="form-label">Custo</label>
+													<input type="number" step="0.01" class="form-control" id="custo-@item.Id" name="custo" value="@item.Custo" required />
+												</div>
+												<div class="mb-3">
+													<label for="dataLimite-@item.Id" class="form-label">Data Limite</label>
+													<input type="date" class="form-control" id="dataLimite-@item.Id" name="dataLimite" value="@item.DataLimite.ToString("yyyy-MM-dd")" required />
+												</div>
+											</div>
+											<div class="modal-footer">
+												<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+												<button type="submit" class="btn btn-primary">Salvar</button>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+
+
+
+							<button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-@item.Id">
+								<i class="fas fa-trash-alt"></i>
+							</button>
+
+
+							<div class="modal fade" id="deleteModal-@item.Id" tabindex="-1" aria-labelledby="deleteModalLabel-@item.Id" aria-hidden="true">
+								<div class="modal-dialog">
+									<div class="modal-content">
+										<div class="modal-header bg-danger text-white">
+											<h5 class="modal-title" id="deleteModalLabel-@item.Id">Confirmar Exclusão</h5>
+											<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+										</div>
+										<div class="modal-body">
+											Tem certeza que deseja excluir a tarefa <strong>@item.Nome</strong>?
+										</div>
+										<div class="modal-footer">
+											<form asp-action="Delete" asp-controller="Home" asp-route-id="@item.Id" method="post">
+												@Html.AntiForgeryToken()
+												<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Não</button>
+												<button type="submit" class="btn btn-danger">Sim</button>
+											</form>
+										</div>
+									</div>
+								</div>
+							</div>
+						</td>
+					</tr>
+				}
+			</tbody>
+
+		</table>
+	</div>
+
+	<!-- Botão de Incluir -->
+	<div class="text-end mt-3">
+		<button class="btn btn-success">
+			<i class="fas fa-plus me-1"></i> Incluir Tarefa
+		</button>
+	</div>
+</div>
