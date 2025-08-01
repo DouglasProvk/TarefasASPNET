@@ -2,11 +2,19 @@
 	ViewData["Title"] = "Home Page";
 }
 
+@if (TempData["Erro"] != null)
+{
+	<div class="alert alert-danger alert-dismissible fade show" role="alert">
+		@TempData["Erro"]
+		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+	</div>
+}
+
+
 @model List<TarefasASPNET.Models.Tarefas>
 
 <div class="container py-5">
 	<h2 class="mb-4">Lista de Tarefas</h2>
-
 	<div class="table-responsive">
 		<table class="table table-bordered align-middle">
 			<thead class="table-light">
@@ -18,7 +26,7 @@
 					<th>Ações</th>
 				</tr>
 			</thead>
-			<tbody>
+			<tbody id="sortable-tarefas">
 				@foreach (var item in Model)
 				{
 					var highlight = item.Custo >= 1000 ? "table-warning" : "";
@@ -29,6 +37,21 @@
 						<td>@item.DataLimite.ToString("dd/MM/yyyy")</td>
 						<td>
 
+							<form asp-action="Mover" asp-controller="Home" method="post" style="display:inline">
+								<input type="hidden" name="id" value="@item.Id" />
+								<input type="hidden" name="direcao" value="cima" />
+								<button type="submit" class="btn btn-sm btn-outline-secondary" title="Subir" @(item.OrdemApresentacao == 1 ? "disabled" : "")>
+									↑
+								</button>
+							</form>
+							<form asp-action="Mover" asp-controller="Home" method="post" style="display:inline">
+								<input type="hidden" name="id" value="@item.Id" />
+								<input type="hidden" name="direcao" value="baixo" />
+								<button type="submit" class="btn btn-sm btn-outline-secondary" title="Descer"
+								@(item.OrdemApresentacao == Model.Max(t => t.OrdemApresentacao) ? "disabled" : "")>
+									↓
+								</button>
+							</form>
 
 							<button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal" data-bs-target="#editModal-@item.Id">
 								<i class="fas fa-edit"></i>
@@ -101,12 +124,46 @@
 			</tbody>
 
 		</table>
+
 	</div>
 
 	<!-- Botão de Incluir -->
 	<div class="text-end mt-3">
-		<button class="btn btn-success">
+		<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createModal">
 			<i class="fas fa-plus me-1"></i> Incluir Tarefa
 		</button>
 	</div>
+
+	<div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header bg-success text-white">
+					<h5 class="modal-title" id="createModalLabel">Incluir Nova Tarefa</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+				</div>
+				<form asp-action="Create" asp-controller="Home" method="post">
+					@Html.AntiForgeryToken()
+					<div class="modal-body">
+						<div class="mb-3">
+							<label for="nomeNovaTarefa" class="form-label">Nome da Tarefa</label>
+							<input type="text" class="form-control" id="nomeNovaTarefa" name="nome" required />
+						</div>
+						<div class="mb-3">
+							<label for="custoNovaTarefa" class="form-label">Custo</label>
+							<input type="number" step="0.01" class="form-control" id="custoNovaTarefa" name="custo" required />
+						</div>
+						<div class="mb-3">
+							<label for="dataLimiteNovaTarefa" class="form-label">Data Limite</label>
+							<input type="date" class="form-control" id="dataLimiteNovaTarefa" name="dataLimite" required />
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+						<button type="submit" class="btn btn-success">Salvar</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
 </div>
